@@ -1,6 +1,7 @@
 import './App.css';
 import Signup from './components/Signup';
 import Login from './components/Login';
+import Main from './components/Main';
 import { 
   Routes, 
   Route, 
@@ -15,6 +16,7 @@ function App() {
       <Routes>
       <Route path="/" element={<Signup />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/Main" element={<Main />} />
       </Routes>
     </div>
   );
