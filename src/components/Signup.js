@@ -1,87 +1,127 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import './Signup.css'
-import axios from "axios";
-
-
-const API_BASE_URL = "http://localhost:8077";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./Signup.css";
+import { FaUser } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux"
+import { toast } from  "react-toastify";
+import { register, reset } from '../auth/authSlice'
+import Spinner from "./Spinner"
 
 const Signup = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const Navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user, isLoading, isError, isSuccess, message} = useSelector(
+    (state) => state.auth
+  )
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  });
 
+  //desructure the state from above
+  const { firstName, lastName, email, password } = formData;
 
-//   const Register = () => {
-//     const [email, setEmail] = useState("");
-//     const [password, setPassword] = useState("");
-  
-//     const handleSubmit = async (e) => {
-//       e.preventDefault();
-//       try {
-//         await axios.post(`${API_BASE_URL}/api/v1/user/signup`, {
-//           email,
-//           password,
-//         });
-//         alert("User Registered Successfully");
-//       } catch (err) {
-//         alert("Error registering user");
-//       }
-//     };
+  useEffect(() => {
+    if(isError) {
+      toast.error(message)
+    }
+    if(isSuccess || user) {
+      <Navigate to={"/main"} />
+      toast.success(message)
+    }
+    dispatch(reset())
 
-///////
+  },[user, isLoading, isError, isSuccess, message, Navigate, dispatch])
+
+  // const onChange = (e) => {
+  //   setFormData((prevState) => ({
+  //     ...prevState,
+  //     [e.target.name]: e.target.value,
+  //   }));
+  // }
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((formData) => ({ ...formData, [name]: value }));
+  };
 
   const registerUser = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/http://localhost:8077/api/v1/user/signup", {
+      const userData = {
         firstName,
-            lastName,
-
+        lastName,
         email,
         password,
-      });
+      }
+       dispatch(register(userData))
       alert("Registration successful");
     } catch (error) {
-      console.log(error);
       alert("Registration failed. please try again.");
     }
   };
 
+  if(isLoading) { 
+    return <Spinner />
+  }
+
   return (
     <div className="signup_container">
-      <div className="form_container">
-        <h2 >Get Started</h2>
-        <form
-          className="form"
-          onSubmit={registerUser}
-        >
-          <input
-            type="name"
-            placeholder="First name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-          <input
-            type="name"
-            placeholder="Last name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-          <input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button className="primary">Register</button>
+      <section className="heading">
+        <h2>
+          <FaUser />
+          Get Started{" "}
+        </h2>
+        <p>Please create an account</p>
+        <form className="form" onSubmit={registerUser}>
+          <div className="form-group">
+            <input
+              type="text"
+              id="firstname"
+              placeholder="Enter your First name"
+              name="firstName"
+              value={firstName}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <input
+              type="text"
+              name="lastName"
+              id="lastname"
+              placeholder="Enter your Last name"
+              value={lastName}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="Enter your @email.com"
+              value={email}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="btn">
+          <button className="btn-block" type="submit">Register</button>
+          </div>
 
           <div className="Link">
             Already a member ?..
@@ -91,7 +131,7 @@ const Signup = () => {
             </Link>
           </div>
         </form>
-      </div>
+      </section>
     </div>
   );
 };

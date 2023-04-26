@@ -1,87 +1,106 @@
-import React, {
-  useContext,
-  useState,
-} from "react";
-import {
-  Link,
-   Navigate
-} from "react-router-dom";
-import axios from "axios"
-import { UserContext } from "../useContext";
+import React, {  useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+// import { UserContext } from "../useContext";
+import { FaSignInAlt } from "react-icons/fa";
+import { useSelector, useDispatch } from "react-redux"
+import { toast } from  "react-toastify";
+import { login, reset } from '../auth/authSlice'
+import Spinner from "./Spinner"
 
-const API_BASE_URL = "http://localhost:8077";
+const Login = (props) => {
+  const Navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user, isLoading, isError, isSuccess, message} = useSelector(
+    (state) => state.auth
+  )
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  // const [redirect, setRedirect] = useState(false);
+  // const { setUser } = useContext(UserContext);
 
-const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-    const [ redirect, setRedirect ] = useState(false)
-    const {setUser} = useContext(UserContext)
+  const { email, password } = formData;
 
-    const loginUser = async (e) => {
-      e.preventDefault()
-      try {
-        const {data} = await axios.post('/http://localhost:8077/api/v1/user/authenticate', {email, password}, {withCredentials: true});
-          localStorage.setItem("token", JSON.stringify(data))
-          console.log(data)
-        setUser(data)
-        alert("login successful")
-        setRedirect(true)
-      } catch (error) {
-        console.log(error)
-        alert("login failed. try again")
+  useEffect(() => {
+    if(isError) {
+      toast.error(message)
+    }
+    if(isSuccess || user) {
+      <Navigate to={"/main"} />
+      toast.success(message)
+    }
+    dispatch(reset())
+  },[user, isLoading, isError, isSuccess, message, Navigate, dispatch])
+
+
+
+
+  const onChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+
+
+  const loginUser = async (e) => {
+    e.preventDefault();
+    try {
+      const userData = {
+        email, password
       }
+      dispatch(login(userData))
+      alert("login successful");
+    } catch (error) {
+      console.log(error);
+      alert("login failed. try again");
     }
+  };
 
-    if(redirect) {
-      return <Navigate to ={'/'} />
-    }
 
-  /////
-
-  // const handleSubmit = async (e) => {
-  //     e.preventDefault();
-  //     try {
-  //       const response = await axios.post(
-  //         `${API_BASE_URL}/api/v1/user/authenticate`,
-  //         {
-  //           email,
-  //           password,
-  //         }
-  //       );
-  //       const token = response.data.token;
-  //       console.log("Token:", token);
-  //       navigate("/home");
-  //     } catch (error) {
-  //       alert("Error logging in.");
-  //     }
-  //   };
+  if(isLoading) { 
+    return <Spinner />
+  }
 
   return (
-    <div className="">
-      <div className="">
-        <h2 className="">Login</h2>
-        <form className="" onSubmit={loginUser}>
-          <input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button className="primary">login</button>
+    <div className="login_container">
+      <section className="heading">
+        <h2 className=""><FaSignInAlt/> log in</h2>
+        <form className="form" onSubmit={loginUser}>
+          <div className="form-group">
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="Enter your @email.com"
+              value={email}
+              onChange={onChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={onChange}
+            />
+          </div>
+          <div className="btn">
+            <button className="btn block" type="submit">login</button>
+          </div>
           <div className="text-center py-2 text-gray-500">
             No account yet?..
-            <Link to={"/"} className="text-gray-600 font-bold underline ">
+            <Link to={"/signup"} className="text-gray-600 font-bold underline ">
               Register Now
             </Link>
           </div>
         </form>
-      </div>
+      </section>
     </div>
   );
 };

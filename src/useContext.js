@@ -1,9 +1,9 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
 
-export const userContext = createContext({});
+export const UserContext = createContext({});
 
-export function useContext({ children }) {
+export function UserContextProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -17,11 +17,11 @@ export function useContext({ children }) {
   }, [user]);
 
   return (
-    <userContext.Provider value={{ user, setUser, loading }}>
+    <UserContext.Provider value={{ user, setUser, loading }}>
       userContext
       {children}
-    </userContext.Provider>
+    </UserContext.Provider>
   );
 }
 
-export default useContext;
+

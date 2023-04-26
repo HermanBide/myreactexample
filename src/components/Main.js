@@ -1,10 +1,19 @@
 import React, { useContext, useState } from "react";
-import useContext from "../useContext";
+import { UserContext } from "../useContext";
+import { useNavigate } from "react-router-dom";
 // import axios from 'axios'
 
 const Main = () => {
+  const Navigate = useNavigate();
     const { user, setUser, loading } = useContext(UserContext);
     const [redirect, setRedirect] = useState(null);
+
+
+  const logout = async () => {
+    localStorage.removeItem("token")
+    setRedirect("/");
+    setUser(null);
+  };
 
   if (!loading) {
     return "loading...";
@@ -20,7 +29,9 @@ const Main = () => {
   
   return (
     <div>
-      <div>Welcome:</div>
+      <div>Welcome! You are logged in as: {user.email}</div>
+
+      <button onClick={logout}></button>
 
     </div>
   );
